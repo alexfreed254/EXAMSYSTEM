@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if prog else 'Add' }} Program - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-graduation-cap me-2 text-primary"></i>{{ 'Edit' if prog else 'Add' }} Program</h4>
+</div>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Program Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" value="{{ prog.name if prog else '' }}" required placeholder="e.g., Electrical Engineering">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Program Code <span class="text-danger">*</span></label>
+                            <input type="text" name="code" class="form-control" value="{{ prog.code if prog else '' }}" required placeholder="e.g., EE-L6">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
+                            <select name="department_id" class="form-select" required>
+                                <option value="">-- Select Department --</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}" {% if prog and prog.department_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">KNQF Level</label>
+                            <input type="text" name="level" class="form-control" value="{{ prog.level if prog else '' }}" placeholder="e.g., KNQF Level 6">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">ISCED Code</label>
+                            <input type="text" name="isced_code" class="form-control" value="{{ prog.isced_code if prog else '' }}" placeholder="e.g., 0713 554B">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Duration (Years)</label>
+                            <input type="number" name="duration_years" class="form-control" value="{{ prog.duration_years if prog else 3 }}" min="1" max="5">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Description</label>
+                            <textarea name="description" class="form-control" rows="3">{{ prog.description if prog else '' }}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Entry Requirements</label>
+                            <textarea name="entry_requirements" class="form-control" rows="3" placeholder="e.g., KCSE Grade C- or Certificate Level 5">{{ prog.entry_requirements if prog else '' }}</textarea>
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>{{ 'Update' if prog else 'Save' }}</button>
+                            <a href="{{ url_for('admin.programs') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}My Results - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-chart-bar me-2 text-primary"></i>My Results</h4>
+</div>
+
+<!-- Filters -->
+<div class="card shadow-sm mb-3">
+    <div class="card-body py-2">
+        <form method="GET" class="d-flex gap-2 flex-wrap">
+            <select name="year_id" class="form-select form-select-sm" style="width:150px">
+                <option value="">All Years</option>
+                {% for y in years %}
+                <option value="{{ y.id }}" {% if selected_year == y.id %}selected{% endif %}>{{ y.name }}</option>
+                {% endfor %}
+            </select>
+            <select name="program_id" class="form-select form-select-sm" style="width:250px">
+                <option value="">All Programs</option>
+                {% for enr in enrollments %}
+                <option value="{{ enr.program_id }}" {% if selected_program == enr.program_id %}selected{% endif %}>{{ enr.program.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter"></i></button>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th><th>Unit Code</th><th>Unit Name</th><th>Module</th>
+                        <th>CA Theory</th><th>CA Pract.</th><th>SA Theory</th><th>SA Pract.</th>
+                        <th>Wtd Theory</th><th>Wtd Pract.</th><th>Overall</th><th>Rating</th><th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr class="{{ 'table-success' if r.competency_status == 'Competent' else 'table-danger' }}">
+                        <td>{{ loop.index }}</td>
+                        <td><code class="small">{{ r.course.tvet_unit_code or r.course.code }}</code></td>
+                        <td class="fw-semibold">{{ r.course.name }}</td>
+                        <td><span class="badge bg-info">Mod {{ r.course.module_number or '-' }}</span></td>
+                        <td>{{ '%.1f'|format(r.ca_theory) if r.ca_theory is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.ca_practical) if r.ca_practical is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.sa_theory) if r.sa_theory is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.sa_practical) if r.sa_practical is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.weighted_theory) if r.weighted_theory is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.weighted_practical) if r.weighted_practical is not none else '-' }}</td>
+                        <td class="fw-bold fs-6">{{ '%.1f'|format(r.overall_score) if r.overall_score is not none else '-' }}%</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if r.competency_rating == 'Attained Mastery' else 'primary' if r.competency_rating == 'Proficient' else 'warning text-dark' if r.competency_rating == 'Competent' else 'danger' }}">
+                                {{ r.competency_rating or '-' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if r.competency_status == 'Competent' else 'danger' }} fw-bold">
+                                {{ r.competency_status or '-' }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="13" class="text-center text-muted py-4">No published results found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if results %}
+    <div class="card-footer">
+        <div class="row text-center">
+            <div class="col">
+                <strong>Total Units:</strong> {{ results|length }}
+            </div>
+            <div class="col">
+                <strong class="text-success">Competent:</strong> {{ results|selectattr('competency_status', 'equalto', 'Competent')|list|length }}
+            </div>
+            <div class="col">
+                <strong class="text-danger">Not Yet Competent:</strong> {{ results|rejectattr('competency_status', 'equalto', 'Competent')|list|length }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

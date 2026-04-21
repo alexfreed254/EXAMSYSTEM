@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Results - TTTI{% endblock %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4><i class="fas fa-chart-bar me-2 text-primary"></i>Results Management</h4>
+    <div class="d-flex gap-2">
+        <form method="POST" action="{{ url_for('admin.publish_bulk') }}" class="d-inline" onsubmit="return confirm('Publish all unpublished results?')">
+            <input type="hidden" name="year_id" value="{{ selected_year or '' }}">
+            <input type="hidden" name="program_id" value="{{ selected_program or '' }}">
+            <button class="btn btn-sm btn-success"><i class="fas fa-check-double me-1"></i>Publish All</button>
+        </form>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card shadow-sm mb-3">
+    <div class="card-body py-2">
+        <form method="GET" class="d-flex gap-2 flex-wrap align-items-center">
+            <select name="program_id" class="form-select form-select-sm" style="width:250px">
+                <option value="">All Programs</option>
+                {% for prog in programs %}
+                <option value="{{ prog.id }}" {% if selected_program == prog.id %}selected{% endif %}>{{ prog.name }}</option>
+                {% endfor %}
+            </select>
+            <select name="year_id" class="form-select form-select-sm" style="width:150px">
+                <option value="">All Years</option>
+                {% for year in years %}
+                <option value="{{ year.id }}" {% if selected_year == year.id %}selected{% endif %}>{{ year.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter me-1"></i>Filter</button>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 small">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th><th>Trainee</th><th>Admission No</th><th>Unit</th>
+                        <th>CA Theory</th><th>CA Pract.</th><th>SA Theory</th><th>SA Pract.</th>
+                        <th>Overall</th><th>Rating</th><th>Status</th><th>Published</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ r.trainee.user.full_name }}</td>
+                        <td><code>{{ r.trainee.admission_number }}</code></td>
+                        <td>{{ r.course.name[:30] }}...</td>
+                        <td>{{ '%.1f'|format(r.ca_theory) if r.ca_theory is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.ca_practical) if r.ca_practical is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.sa_theory) if r.sa_theory is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.sa_practical) if r.sa_practical is not none else '-' }}</td>
+                        <td class="fw-bold">{{ '%.1f'|format(r.overall_score) if r.overall_score is not none else '-' }}%</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if r.competency_rating == 'Attained Mastery' else 'primary' if r.competency_rating == 'Proficient' else 'warning text-dark' if r.competency_rating == 'Competent' else 'danger' }}">
+                                {{ r.competency_rating or '-' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if r.competency_status == 'Competent' else 'danger' }}">
+                                {{ r.competency_status or '-' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if r.is_published %}
+                            <span class="badge bg-success"><i class="fas fa-check"></i> Yes</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not r.is_published %}
+                            <form method="POST" action="{{ url_for('admin.publish_result', result_id=r.id) }}" class="d-inline">
+                                <button class="btn btn-xs btn-success" title="Publish"><i class="fas fa-check"></i></button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="13" class="text-center text-muted py-4">No results found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-muted small">Showing {{ results|length }} result(s)</div>
+</div>
+{% endblock %}

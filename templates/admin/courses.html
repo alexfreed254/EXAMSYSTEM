@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Units/Courses - TTTI{% endblock %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4><i class="fas fa-book me-2 text-primary"></i>Units / Courses</h4>
+    <a href="{{ url_for('admin.add_course') }}" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus me-1"></i>Add Unit
+    </a>
+</div>
+
+<!-- Filter -->
+<div class="card shadow-sm mb-3">
+    <div class="card-body py-2">
+        <form method="GET" class="d-flex gap-2 align-items-center">
+            <label class="form-label mb-0 fw-semibold">Filter by Program:</label>
+            <select name="program_id" class="form-select form-select-sm" style="width:300px" onchange="this.form.submit()">
+                <option value="">All Programs</option>
+                {% for prog in programs %}
+                <option value="{{ prog.id }}" {% if selected_program == prog.id %}selected{% endif %}>{{ prog.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th><th>Code</th><th>TVET Unit Code</th><th>Unit Name</th>
+                        <th>Program</th><th>Module</th><th>Category</th>
+                        <th>Theory%</th><th>Practical%</th><th>Credits</th><th>Hours</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><span class="badge bg-secondary">{{ course.code }}</span></td>
+                        <td><code class="small">{{ course.tvet_unit_code or '-' }}</code></td>
+                        <td class="fw-semibold">{{ course.name }}</td>
+                        <td>{{ course.program.name if course.program else '-' }}</td>
+                        <td><span class="badge bg-info">Mod {{ course.module_number or '-' }}</span></td>
+                        <td>
+                            {% if course.unit_category == 'CR' %}<span class="badge bg-danger">Core</span>
+                            {% elif course.unit_category == 'CC' %}<span class="badge bg-warning text-dark">Common</span>
+                            {% elif course.unit_category == 'BC' %}<span class="badge bg-success">Basic</span>
+                            {% else %}<span class="badge bg-secondary">{{ course.unit_category }}</span>{% endif %}
+                        </td>
+                        <td>{{ course.theory_weight }}%</td>
+                        <td>{{ course.practical_weight }}%</td>
+                        <td>{{ course.credit_factor }}</td>
+                        <td>{{ course.duration_hours }}h</td>
+                        <td>
+                            <a href="{{ url_for('admin.edit_course', course_id=course.id) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                            <form method="POST" action="{{ url_for('admin.delete_course', course_id=course.id) }}" class="d-inline" onsubmit="return confirm('Delete this unit?')">
+                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="12" class="text-center text-muted py-4">No units found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

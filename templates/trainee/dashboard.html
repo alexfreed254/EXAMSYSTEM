@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-tachometer-alt me-2 text-primary"></i>My Dashboard</h4>
+    <small class="text-muted">Welcome, {{ current_user.full_name }} | {{ trainee.admission_number }}</small>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+            <div class="stat-info">
+                <div class="stat-number">{{ stats.total_results }}</div>
+                <div class="stat-label">Results Available</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+                <div class="stat-number">{{ stats.competent }}</div>
+                <div class="stat-label">Units Competent</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+            <div class="stat-info">
+                <div class="stat-number">{{ stats.not_yet_competent }}</div>
+                <div class="stat-label">Not Yet Competent</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="fas fa-file-pdf"></i></div>
+            <div class="stat-info">
+                <div class="stat-number">{{ stats.transcripts }}</div>
+                <div class="stat-label">Transcripts</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enrollment Info -->
+<div class="row g-3 mb-4">
+    <div class="col-md-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-header"><i class="fas fa-graduation-cap me-2 text-primary"></i>My Enrollment</div>
+            <div class="card-body">
+                {% for enr in enrollments %}
+                <div class="mb-3 p-3 bg-light rounded">
+                    <div class="fw-bold text-primary">{{ enr.program.name }}</div>
+                    <div class="small text-muted">{{ enr.program.level or '' }} | {{ enr.program.department.name if enr.program.department else '' }}</div>
+                    <div class="small mt-1">
+                        <span class="badge bg-info">Intake: {{ enr.intake_month }} {{ enr.intake_year }}</span>
+                        <span class="badge bg-{{ 'success' if enr.status == 'active' else 'secondary' }} ms-1">{{ enr.status }}</span>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted">Not enrolled in any program.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-chart-bar me-2 text-primary"></i>Recent Results</span>
+                <a href="{{ url_for('trainee.results') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                    <thead class="table-light"><tr><th>Unit</th><th>Overall</th><th>Status</th></tr></thead>
+                    <tbody>
+                        {% for r in recent_results %}
+                        <tr>
+                            <td>{{ r.course.name[:30] }}...</td>
+                            <td class="fw-bold">{{ '%.1f'|format(r.overall_score) if r.overall_score is not none else '-' }}%</td>
+                            <td><span class="badge bg-{{ 'success' if r.competency_status == 'Competent' else 'danger' }}">{{ r.competency_status }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center text-muted py-3">No results published yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transcripts -->
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-file-pdf me-2 text-primary"></i>My Transcripts</span>
+        <a href="{{ url_for('trainee.transcripts') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body">
+        {% if stats.transcripts > 0 %}
+        <p class="text-success"><i class="fas fa-check-circle me-1"></i>You have {{ stats.transcripts }} transcript(s) available for download.</p>
+        <a href="{{ url_for('trainee.transcripts') }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-download me-1"></i>Download Transcripts
+        </a>
+        {% else %}
+        <p class="text-muted"><i class="fas fa-info-circle me-1"></i>No transcripts available yet. Contact the registrar's office.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

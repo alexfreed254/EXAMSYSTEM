@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}View Transcript - TTTI{% endblock %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4><i class="fas fa-file-alt me-2 text-primary"></i>Transcript Preview</h4>
+    <a href="{{ url_for('trainee.download_transcript', transcript_id=transcript.id) }}" class="btn btn-primary btn-sm">
+        <i class="fas fa-download me-1"></i>Download PDF
+    </a>
+</div>
+
+<!-- Transcript Preview Card -->
+<div class="card shadow transcript-preview">
+    <!-- Header -->
+    <div class="card-header p-3" style="background: linear-gradient(135deg, #1F4E79, #2E75B6);">
+        <div class="d-flex justify-content-between align-items-center">
+            <img src="{{ url_for('static', filename='images/govt_logo.png') }}" alt="GOK" height="60" onerror="this.style.display='none'">
+            <div class="text-center text-white">
+                <h5 class="fw-bold mb-0">THIKA TECHNICAL TRAINING INSTITUTE</h5>
+                <small>P.O. Box 93 - 01000, Thika | Tel: +254-67-22396</small>
+                <div class="mt-1"><span class="badge bg-danger px-3 py-1">OFFICIAL ACADEMIC TRANSCRIPT</span></div>
+            </div>
+            <img src="{{ url_for('static', filename='images/ttti_logo.png') }}" alt="TTTI" height="60" onerror="this.style.display='none'">
+        </div>
+    </div>
+
+    <div class="card-body p-4">
+        <!-- Serial & Date -->
+        <div class="row mb-3 p-2 bg-light rounded">
+            <div class="col-md-4"><strong>Serial No:</strong> <code class="text-primary">{{ transcript.serial_number }}</code></div>
+            <div class="col-md-4"><strong>Date Issued:</strong> {{ transcript.generated_at.strftime('%d %B %Y') }}</div>
+            <div class="col-md-4"><strong>Status:</strong> <span class="badge bg-success">{{ 'OFFICIAL' if transcript.is_official else 'UNOFFICIAL' }}</span></div>
+        </div>
+
+        <!-- Student Info -->
+        <div class="section-header mb-2">STUDENT INFORMATION</div>
+        <div class="row g-2 mb-3">
+            <div class="col-md-6"><span class="text-muted">Full Name:</span> <strong>{{ trainee.user.full_name.upper() }}</strong></div>
+            <div class="col-md-6"><span class="text-muted">Admission No:</span> <strong>{{ trainee.admission_number }}</strong></div>
+            <div class="col-md-6"><span class="text-muted">Programme:</span> {{ transcript.program.name }}</div>
+            <div class="col-md-6"><span class="text-muted">Level:</span> {{ transcript.program.level or '-' }}</div>
+            <div class="col-md-6"><span class="text-muted">Department:</span> {{ transcript.program.department.name if transcript.program.department else '-' }}</div>
+            <div class="col-md-6"><span class="text-muted">Academic Year:</span> {{ transcript.academic_year.name }}</div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="section-header mb-2">ACADEMIC RESULTS</div>
+        <div class="table-responsive mb-3">
+            <table class="table table-bordered table-sm small">
+                <thead style="background:#1F4E79; color:white;">
+                    <tr>
+                        <th>Unit Code</th><th>Unit Name</th><th>Cat</th><th>Mod</th>
+                        <th>CA Theory</th><th>CA Pract.</th><th>SA Theory</th><th>SA Pract.</th>
+                        <th>Wtd Theory</th><th>Wtd Pract.</th><th>Overall</th><th>Rating</th><th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set current_mod = namespace(val=None) %}
+                    {% for r in results %}
+                    {% if r.course.module_number != current_mod.val %}
+                    {% set current_mod.val = r.course.module_number %}
+                    <tr style="background:#D6E4F0;"><td colspan="13" class="fw-bold">MODULE {{ r.course.module_number }}</td></tr>
+                    {% endif %}
+                    <tr class="{{ 'table-success' if r.competency_status == 'Competent' else 'table-danger' }}">
+                        <td><code class="small">{{ r.course.tvet_unit_code or r.course.code }}</code></td>
+                        <td>{{ r.course.name }}</td>
+                        <td>{{ r.course.unit_category or '-' }}</td>
+                        <td>{{ r.course.module_number or '-' }}</td>
+                        <td>{{ '%.1f'|format(r.ca_theory) if r.ca_theory is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.ca_practical) if r.ca_practical is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.sa_theory) if r.sa_theory is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.sa_practical) if r.sa_practical is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.weighted_theory) if r.weighted_theory is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.weighted_practical) if r.weighted_practical is not none else '-' }}</td>
+                        <td class="fw-bold">{{ '%.1f'|format(r.overall_score) if r.overall_score is not none else '-' }}%</td>
+                        <td><span class="badge bg-{{ 'success' if r.competency_rating == 'Attained Mastery' else 'primary' if r.competency_rating == 'Proficient' else 'warning text-dark' if r.competency_rating == 'Competent' else 'danger' }}">{{ r.competency_rating or '-' }}</span></td>
+                        <td><span class="badge bg-{{ 'success' if r.competency_status == 'Competent' else 'danger' }}">{{ r.competency_status or '-' }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="13" class="text-center text-muted">No results available</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Grading Key -->
+        <div class="section-header mb-2">GRADING KEY (TVET CDACC)</div>
+        <div class="row g-2 mb-3">
+            <div class="col-md-3"><span class="badge bg-success px-2">80-100</span> Attained Mastery</div>
+            <div class="col-md-3"><span class="badge bg-primary px-2">65-79</span> Proficient</div>
+            <div class="col-md-3"><span class="badge bg-warning text-dark px-2">50-64</span> Competent</div>
+            <div class="col-md-3"><span class="badge bg-danger px-2">&lt;50</span> Not Yet Competent</div>
+        </div>
+
+        <!-- Signatures -->
+        <div class="row mt-4 pt-3 border-top">
+            <div class="col-md-4 text-center">
+                <div class="border-bottom mb-1" style="height:40px;"></div>
+                <strong>Registrar</strong><br><small class="text-muted">Date: ___________</small>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="border-bottom mb-1" style="height:40px;"></div>
+                <strong>Principal</strong><br><small class="text-muted">Date: ___________</small>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="border-bottom mb-1" style="height:40px;"></div>
+                <strong>Head of Department</strong><br><small class="text-muted">Date: ___________</small>
+            </div>
+        </div>
+
+        <div class="text-center mt-3 p-2 bg-warning-subtle rounded small">
+            <i class="fas fa-shield-alt me-1"></i>
+            <strong>Verification Code:</strong> {{ transcript.serial_number }} |
+            This transcript is only valid with the official stamp and signature of the Registrar.
+        </div>
+    </div>
+</div>
+{% endblock %}

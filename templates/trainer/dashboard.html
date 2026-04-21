@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Trainer Dashboard - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-tachometer-alt me-2 text-primary"></i>Trainer Dashboard</h4>
+    <small class="text-muted">Welcome, {{ current_user.full_name }} | {{ trainer.employee_id }}</small>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+            <div class="stat-info">
+                <div class="stat-number">{{ stats.total_results }}</div>
+                <div class="stat-label">Total Results Uploaded</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+                <div class="stat-number">{{ stats.published }}</div>
+                <div class="stat-label">Published</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+                <div class="stat-number">{{ stats.pending }}</div>
+                <div class="stat-label">Pending Review</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white"><i class="fas fa-bolt me-2"></i>Quick Actions</div>
+            <div class="card-body">
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ url_for('trainer.upload_results') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-upload me-1"></i>Upload Results
+                    </a>
+                    <a href="{{ url_for('trainer.my_results') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list me-1"></i>View My Results
+                    </a>
+                    <a href="{{ url_for('trainer.trainees') }}" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-user-graduate me-1"></i>My Trainees
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Results -->
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-chart-bar me-2 text-primary"></i>Recent Results</span>
+        <a href="{{ url_for('trainer.my_results') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 small">
+                <thead class="table-light">
+                    <tr><th>Trainee</th><th>Unit</th><th>Overall</th><th>Status</th><th>Published</th><th>Date</th></tr>
+                </thead>
+                <tbody>
+                    {% for r in recent_results %}
+                    <tr>
+                        <td>{{ r.trainee.user.full_name }}</td>
+                        <td>{{ r.course.name[:30] }}...</td>
+                        <td class="fw-bold">{{ '%.1f'|format(r.overall_score) if r.overall_score is not none else '-' }}%</td>
+                        <td><span class="badge bg-{{ 'success' if r.competency_status == 'Competent' else 'danger' }}">{{ r.competency_status or '-' }}</span></td>
+                        <td>{{ '✓' if r.is_published else '⏳' }}</td>
+                        <td class="text-muted">{{ r.uploaded_at.strftime('%d/%m/%Y') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center text-muted py-3">No results uploaded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

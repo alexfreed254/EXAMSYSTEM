@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Upload Results - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-upload me-2 text-primary"></i>Upload Results from Excel</h4>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-file-excel me-2"></i>Upload Results File
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info small mb-3">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <strong>Instructions:</strong> Download the template first, fill in the marks (all out of 100), then upload.
+                    The system will automatically compute weighted scores and competency status per TVET CDACC guidelines.
+                </div>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Unit/Course <span class="text-danger">*</span></label>
+                        <select name="course_id" class="form-select" id="courseSelect" required>
+                            <option value="">-- Select Unit/Course --</option>
+                            {% for course in courses %}
+                            <option value="{{ course.id }}">{{ course.name }} ({{ course.code }}) - {{ course.program.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Academic Year <span class="text-danger">*</span></label>
+                        <select name="year_id" class="form-select" required>
+                            <option value="">-- Select Year --</option>
+                            {% for year in years %}
+                            <option value="{{ year.id }}" {% if current_year and year.id == current_year.id %}selected{% endif %}>
+                                {{ year.name }} {% if year.is_current %}(Current){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Excel File <span class="text-danger">*</span></label>
+                        <input type="file" name="excel_file" class="form-control" accept=".xlsx,.xls" required>
+                        <div class="form-text">Accepted formats: .xlsx, .xls | Max size: 16MB</div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload me-1"></i>Upload & Process
+                        </button>
+                        <button type="button" class="btn btn-outline-success" id="downloadTemplateBtn" onclick="downloadTemplate()">
+                            <i class="fas fa-download me-1"></i>Download Template
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header"><i class="fas fa-info-circle me-2 text-primary"></i>Excel Template Format</div>
+            <div class="card-body">
+                <p class="small text-muted mb-2">Your Excel file must have these columns:</p>
+                <table class="table table-sm table-bordered small">
+                    <thead class="table-light">
+                        <tr><th>Column</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>admission_number</code></td><td>Trainee admission no.</td></tr>
+                        <tr><td><code>ca_theory</code></td><td>CA Theory (0-100)</td></tr>
+                        <tr><td><code>ca_practical</code></td><td>CA Practical (0-100)</td></tr>
+                        <tr><td><code>sa_theory</code></td><td>SA Theory (0-100)</td></tr>
+                        <tr><td><code>sa_practical</code></td><td>SA Practical (0-100)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header"><i class="fas fa-calculator me-2 text-primary"></i>TVET CDACC Computation</div>
+            <div class="card-body small">
+                <p class="fw-semibold mb-1">Weighted Scores:</p>
+                <ul class="mb-2">
+                    <li>Weighted = CA(60%) + SA(40%)</li>
+                    <li>Overall = Theory(%) + Practical(%)</li>
+                </ul>
+                <p class="fw-semibold mb-1">Competency Rules:</p>
+                <ul class="mb-2">
+                    <li>Theory ≥ 40%</li>
+                    <li>Practical ≥ 50%</li>
+                    <li>Overall ≥ 50%</li>
+                </ul>
+                <p class="fw-semibold mb-1">Ratings:</p>
+                <ul class="mb-0">
+                    <li>80-100: Attained Mastery</li>
+                    <li>65-79: Proficient</li>
+                    <li>50-64: Competent</li>
+                    <li>&lt;50: Not Yet Competent</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function downloadTemplate() {
+    const courseId = document.getElementById('courseSelect').value;
+    if (!courseId) {
+        alert('Please select a unit/course first to download the template.');
+        return;
+    }
+    window.location.href = '/trainer/download-template/' + courseId;
+}
+</script>
+{% endblock %}

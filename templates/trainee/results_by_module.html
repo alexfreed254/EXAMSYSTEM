@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Results by Module - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-layer-group me-2 text-primary"></i>Results by Module</h4>
+</div>
+
+{% for mod_num, mod_data in modules.items()|sort %}
+<div class="card shadow-sm mb-3">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-layer-group me-2"></i>MODULE {{ mod_num }}</span>
+        <div>
+            {% set mod_results = mod_data.results %}
+            {% set comp = mod_results|selectattr('competency_status', 'equalto', 'Competent')|list|length %}
+            <span class="badge bg-light text-dark">{{ comp }}/{{ mod_results|length }} Competent</span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 small">
+                <thead class="table-light">
+                    <tr>
+                        <th>Unit Code</th><th>Unit Name</th><th>Category</th>
+                        <th>CA Theory</th><th>CA Pract.</th><th>SA Theory</th><th>SA Pract.</th>
+                        <th>Overall</th><th>Rating</th><th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in mod_data.results %}
+                    <tr class="{{ 'table-success' if r.competency_status == 'Competent' else 'table-danger' }}">
+                        <td><code>{{ r.course.tvet_unit_code or r.course.code }}</code></td>
+                        <td class="fw-semibold">{{ r.course.name }}</td>
+                        <td>
+                            {% if r.course.unit_category == 'CR' %}<span class="badge bg-danger">Core</span>
+                            {% elif r.course.unit_category == 'CC' %}<span class="badge bg-warning text-dark">Common</span>
+                            {% elif r.course.unit_category == 'BC' %}<span class="badge bg-success">Basic</span>
+                            {% else %}<span class="badge bg-secondary">{{ r.course.unit_category }}</span>{% endif %}
+                        </td>
+                        <td>{{ '%.1f'|format(r.ca_theory) if r.ca_theory is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.ca_practical) if r.ca_practical is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.sa_theory) if r.sa_theory is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.sa_practical) if r.sa_practical is not none else '-' }}</td>
+                        <td class="fw-bold">{{ '%.1f'|format(r.overall_score) if r.overall_score is not none else '-' }}%</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if r.competency_rating == 'Attained Mastery' else 'primary' if r.competency_rating == 'Proficient' else 'warning text-dark' if r.competency_rating == 'Competent' else 'danger' }}">
+                                {{ r.competency_rating or '-' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if r.competency_status == 'Competent' else 'danger' }}">
+                                {{ r.competency_status or '-' }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">No results available yet.</div>
+{% endfor %}
+{% endblock %}

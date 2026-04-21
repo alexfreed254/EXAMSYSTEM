@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if course else 'Add' }} Unit/Course - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-book me-2 text-primary"></i>{{ 'Edit' if course else 'Add' }} Unit / Course</h4>
+</div>
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <div class="alert alert-info small mb-3">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <strong>TVET CDACC Weighting:</strong> Module I-II: Theory 10% / Practical 90% | Module III-V: Theory 30% / Practical 70% | Module VI-VIII: Theory 40% / Practical 60%
+                </div>
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Unit Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" value="{{ course.name if course else '' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Unit Code <span class="text-danger">*</span></label>
+                            <input type="text" name="code" class="form-control" value="{{ course.code if course else '' }}" required placeholder="e.g., 0713 251 23B">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">TVET CDACC Unit Code</label>
+                            <input type="text" name="tvet_unit_code" class="form-control" value="{{ course.tvet_unit_code if course else '' }}" placeholder="e.g., ENG/CU/EI/CR/01/6/MB">
+                            <div class="form-text">Format: Industry/CU/OccupationalArea/UnitType/Number/Level/Version</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Program <span class="text-danger">*</span></label>
+                            <select name="program_id" class="form-select" required>
+                                <option value="">-- Select Program --</option>
+                                {% for prog in programs %}
+                                <option value="{{ prog.id }}" {% if course and course.program_id == prog.id %}selected{% endif %}>{{ prog.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Module Number</label>
+                            <select name="module_number" class="form-select">
+                                {% for i in range(1, 9) %}
+                                <option value="{{ i }}" {% if course and course.module_number == i %}selected{% endif %}>Module {{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Unit Category</label>
+                            <select name="unit_category" class="form-select" id="unitCategory" onchange="setWeighting()">
+                                <option value="CR" {% if course and course.unit_category == 'CR' %}selected{% endif %}>CR - Core</option>
+                                <option value="CC" {% if course and course.unit_category == 'CC' %}selected{% endif %}>CC - Common</option>
+                                <option value="BC" {% if course and course.unit_category == 'BC' %}selected{% endif %}>BC - Basic</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Theory Weight (%)</label>
+                            <input type="number" name="theory_weight" id="theoryWeight" class="form-control" value="{{ course.theory_weight if course else 30 }}" min="0" max="100" step="5" onchange="updatePractical()">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Practical Weight (%)</label>
+                            <input type="number" id="practicalDisplay" class="form-control bg-light" value="{{ course.practical_weight if course else 70 }}" readonly>
+                            <div class="form-text">Auto-calculated (100 - Theory)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Credit Factor</label>
+                            <input type="number" name="credit_factor" class="form-control" value="{{ course.credit_factor if course else 10 }}" step="0.5" min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Duration (Hours)</label>
+                            <input type="number" name="duration_hours" class="form-control" value="{{ course.duration_hours if course else 100 }}" min="1">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Description</label>
+                            <textarea name="description" class="form-control" rows="2">{{ course.description if course else '' }}</textarea>
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>{{ 'Update' if course else 'Save' }}</button>
+                            <a href="{{ url_for('admin.courses') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function updatePractical() {
+    const theory = parseFloat(document.getElementById('theoryWeight').value) || 0;
+    document.getElementById('practicalDisplay').value = (100 - theory).toFixed(0);
+}
+</script>
+{% endblock %}

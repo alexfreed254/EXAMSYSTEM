@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TTTI - Examination Result Management System{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="d-flex align-items-center gap-2 px-3 py-2">
+                <img src="{{ url_for('static', filename='images/ttti_logo.png') }}" alt="TTTI" height="40" onerror="this.style.display='none'">
+                <div>
+                    <div class="fw-bold text-white" style="font-size:0.85rem;">TTTI</div>
+                    <div class="text-white-50" style="font-size:0.7rem;">Result Management</div>
+                </div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            {% if current_user.role == 'admin' %}
+            <div class="nav-section">MAIN</div>
+            <a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <div class="nav-section">ACADEMIC</div>
+            <a href="{{ url_for('admin.departments') }}" class="nav-link {% if 'department' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-building"></i> Departments
+            </a>
+            <a href="{{ url_for('admin.programs') }}" class="nav-link {% if 'program' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-graduation-cap"></i> Programs
+            </a>
+            <a href="{{ url_for('admin.courses') }}" class="nav-link {% if 'course' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-book"></i> Units/Courses
+            </a>
+            <a href="{{ url_for('admin.academic_years') }}" class="nav-link {% if 'academic_year' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-calendar-alt"></i> Academic Years
+            </a>
+            <div class="nav-section">PEOPLE</div>
+            <a href="{{ url_for('admin.trainees') }}" class="nav-link {% if 'trainee' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-user-graduate"></i> Trainees
+            </a>
+            <a href="{{ url_for('admin.trainers') }}" class="nav-link {% if 'trainer' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-chalkboard-teacher"></i> Trainers
+            </a>
+            <a href="{{ url_for('admin.users') }}" class="nav-link {% if request.endpoint == 'admin.users' %}active{% endif %}">
+                <i class="fas fa-users-cog"></i> User Accounts
+            </a>
+            <div class="nav-section">RESULTS</div>
+            <a href="{{ url_for('admin.results') }}" class="nav-link {% if request.endpoint == 'admin.results' %}active{% endif %}">
+                <i class="fas fa-chart-bar"></i> Results
+            </a>
+            <a href="{{ url_for('admin.transcripts') }}" class="nav-link {% if 'transcript' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-file-alt"></i> Transcripts
+            </a>
+            <div class="nav-section">SYSTEM</div>
+            <a href="{{ url_for('admin.system_logs') }}" class="nav-link {% if 'log' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-history"></i> System Logs
+            </a>
+            {% elif current_user.role == 'trainer' %}
+            <div class="nav-section">MAIN</div>
+            <a href="{{ url_for('trainer.dashboard') }}" class="nav-link {% if request.endpoint == 'trainer.dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <div class="nav-section">RESULTS</div>
+            <a href="{{ url_for('trainer.upload_results') }}" class="nav-link {% if 'upload' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-upload"></i> Upload Results
+            </a>
+            <a href="{{ url_for('trainer.my_results') }}" class="nav-link {% if request.endpoint == 'trainer.my_results' %}active{% endif %}">
+                <i class="fas fa-list-alt"></i> My Results
+            </a>
+            <div class="nav-section">TRAINEES</div>
+            <a href="{{ url_for('trainer.trainees') }}" class="nav-link {% if request.endpoint == 'trainer.trainees' %}active{% endif %}">
+                <i class="fas fa-user-graduate"></i> My Trainees
+            </a>
+            <div class="nav-section">ACCOUNT</div>
+            <a href="{{ url_for('trainer.profile') }}" class="nav-link {% if request.endpoint == 'trainer.profile' %}active{% endif %}">
+                <i class="fas fa-user-circle"></i> My Profile
+            </a>
+            {% elif current_user.role == 'trainee' %}
+            <div class="nav-section">MAIN</div>
+            <a href="{{ url_for('trainee.dashboard') }}" class="nav-link {% if request.endpoint == 'trainee.dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <div class="nav-section">ACADEMICS</div>
+            <a href="{{ url_for('trainee.results') }}" class="nav-link {% if request.endpoint == 'trainee.results' %}active{% endif %}">
+                <i class="fas fa-chart-bar"></i> My Results
+            </a>
+            <a href="{{ url_for('trainee.results_by_module') }}" class="nav-link {% if 'module' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-layer-group"></i> Results by Module
+            </a>
+            <a href="{{ url_for('trainee.transcripts') }}" class="nav-link {% if request.endpoint == 'trainee.transcripts' %}active{% endif %}">
+                <i class="fas fa-file-pdf"></i> My Transcripts
+            </a>
+            <div class="nav-section">ACCOUNT</div>
+            <a href="{{ url_for('trainee.notifications') }}" class="nav-link {% if 'notification' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-bell"></i> Notifications
+                {% set unread = current_user.notifications | selectattr('is_read', 'equalto', false) | list | length %}
+                {% if unread > 0 %}<span class="badge bg-danger ms-1">{{ unread }}</span>{% endif %}
+            </a>
+            <a href="{{ url_for('trainee.profile') }}" class="nav-link {% if request.endpoint == 'trainee.profile' %}active{% endif %}">
+                <i class="fas fa-user-circle"></i> My Profile
+            </a>
+            {% endif %}
+            <div class="nav-section">ACCOUNT</div>
+            <a href="{{ url_for('auth.change_password') }}" class="nav-link">
+                <i class="fas fa-key"></i> Change Password
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Navbar -->
+        <nav class="top-navbar">
+            <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="d-flex align-items-center gap-3 ms-auto">
+                <span class="badge bg-primary text-capitalize">{{ current_user.role }}</span>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>{{ current_user.full_name }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ url_for('auth.change_password') }}"><i class="fas fa-key me-2"></i>Change Password</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Flash Messages -->
+        <div class="px-4 pt-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content px-4 pb-4">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    {% else %}
+    {% block auth_content %}{% endblock %}
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

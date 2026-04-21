@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Trainers - TTTI{% endblock %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4><i class="fas fa-chalkboard-teacher me-2 text-primary"></i>Trainers</h4>
+    <a href="{{ url_for('admin.add_trainer') }}" class="btn btn-primary btn-sm">
+        <i class="fas fa-user-plus me-1"></i>Add Trainer
+    </a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr><th>#</th><th>Employee ID</th><th>Full Name</th><th>Department</th><th>Qualification</th><th>TVETA License</th><th>Results</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for t in trainers %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><code class="text-primary">{{ t.employee_id }}</code></td>
+                        <td class="fw-semibold">{{ t.user.full_name }}</td>
+                        <td>{{ t.department.name if t.department else '-' }}</td>
+                        <td>{{ t.qualification or '-' }}</td>
+                        <td>{{ t.tveta_license or '-' }}</td>
+                        <td><span class="badge bg-info">{{ t.results_uploaded.count() }}</span></td>
+                        <td><span class="badge bg-{{ 'success' if t.user.is_active else 'danger' }}">{{ 'Active' if t.user.is_active else 'Inactive' }}</span></td>
+                        <td>
+                            <a href="{{ url_for('admin.edit_trainer', trainer_id=t.id) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="9" class="text-center text-muted py-4">No trainers found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

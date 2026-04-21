@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Generate Transcript - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-file-pdf me-2 text-primary"></i>Generate Official Transcript</h4>
+</div>
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-info-circle me-2"></i>Transcript Generation
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info small">
+                    <i class="fas fa-info-circle me-1"></i>
+                    A unique serial number starting with <strong>TTTI/</strong> will be automatically assigned to each transcript.
+                    Only published results will be included.
+                </div>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Trainee <span class="text-danger">*</span></label>
+                        <select name="trainee_id" class="form-select" required>
+                            <option value="">-- Select Trainee --</option>
+                            {% for t in trainees %}
+                            <option value="{{ t.id }}">{{ t.user.full_name }} ({{ t.admission_number }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Program <span class="text-danger">*</span></label>
+                        <select name="program_id" class="form-select" required>
+                            <option value="">-- Select Program --</option>
+                            {% for prog in programs %}
+                            <option value="{{ prog.id }}">{{ prog.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Academic Year <span class="text-danger">*</span></label>
+                        <select name="year_id" class="form-select" required>
+                            <option value="">-- Select Year --</option>
+                            {% for year in years %}
+                            <option value="{{ year.id }}" {% if year.is_current %}selected{% endif %}>
+                                {{ year.name }} {% if year.is_current %}(Current){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-file-pdf me-1"></i>Generate Transcript
+                        </button>
+                        <a href="{{ url_for('admin.transcripts') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

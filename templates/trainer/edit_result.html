@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Edit Result - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-edit me-2 text-primary"></i>Edit Result</h4>
+</div>
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <strong>{{ result.trainee.user.full_name }}</strong> — {{ result.course.name }}
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning small">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    All marks are out of 100. Theory weight: {{ result.course.theory_weight }}% | Practical weight: {{ result.course.practical_weight }}%
+                </div>
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">CA Theory (out of 100)</label>
+                            <input type="number" name="ca_theory" class="form-control" value="{{ result.ca_theory or '' }}" min="0" max="100" step="0.5">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">CA Practical (out of 100)</label>
+                            <input type="number" name="ca_practical" class="form-control" value="{{ result.ca_practical or '' }}" min="0" max="100" step="0.5">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">SA Theory (out of 100)</label>
+                            <input type="number" name="sa_theory" class="form-control" value="{{ result.sa_theory or '' }}" min="0" max="100" step="0.5">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">SA Practical (out of 100)</label>
+                            <input type="number" name="sa_practical" class="form-control" value="{{ result.sa_practical or '' }}" min="0" max="100" step="0.5">
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Update Result</button>
+                            <a href="{{ url_for('trainer.my_results') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

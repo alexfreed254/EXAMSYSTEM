@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Enrollments - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-user-check me-2 text-primary"></i>Enrollments</h4>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr><th>#</th><th>Trainee</th><th>Program</th><th>Intake</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                {% for enr in enrollments %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ enr.trainee.user.full_name }}</td>
+                    <td>{{ enr.program.name }}</td>
+                    <td>{{ enr.intake_month }} {{ enr.intake_year }}</td>
+                    <td><span class="badge bg-{{ 'success' if enr.status == 'active' else 'secondary' }}">{{ enr.status }}</span></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center text-muted py-4">No enrollments found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

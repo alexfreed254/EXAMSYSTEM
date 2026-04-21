@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Trainee Profile - TTTI{% endblock %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4><i class="fas fa-user-graduate me-2 text-primary"></i>Trainee Profile</h4>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('admin.edit_trainee', trainee_id=trainee.id) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit me-1"></i>Edit</a>
+        <a href="{{ url_for('admin.trainees') }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="avatar-circle mb-3">{{ trainee.user.full_name[0].upper() }}</div>
+                <h5 class="fw-bold">{{ trainee.user.full_name }}</h5>
+                <p class="text-muted mb-1"><code>{{ trainee.admission_number }}</code></p>
+                <span class="badge bg-{{ 'success' if trainee.user.is_active else 'danger' }}">{{ 'Active' if trainee.user.is_active else 'Inactive' }}</span>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">National ID</span><span>{{ trainee.national_id or '-' }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Gender</span><span>{{ trainee.gender or '-' }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">County</span><span>{{ trainee.county or '-' }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Phone</span><span>{{ trainee.user.phone or '-' }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Email</span><span class="small">{{ trainee.user.email }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <!-- Enrollments -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header"><i class="fas fa-graduation-cap me-2"></i>Enrollments</div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead class="table-light"><tr><th>Program</th><th>Intake</th><th>Status</th></tr></thead>
+                    <tbody>
+                        {% for enr in trainee.enrollments %}
+                        <tr>
+                            <td>{{ enr.program.name }}</td>
+                            <td>{{ enr.intake_month }} {{ enr.intake_year }}</td>
+                            <td><span class="badge bg-{{ 'success' if enr.status == 'active' else 'secondary' }}">{{ enr.status }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center text-muted">Not enrolled in any program</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Results Summary -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Results Summary</div>
+            <div class="card-body p-0">
+                <table class="table mb-0 small">
+                    <thead class="table-light"><tr><th>Unit</th><th>Overall</th><th>Status</th><th>Published</th></tr></thead>
+                    <tbody>
+                        {% for r in results %}
+                        <tr>
+                            <td>{{ r.course.name }}</td>
+                            <td>{{ '%.1f'|format(r.overall_score) if r.overall_score else '-' }}%</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if r.competency_status == 'Competent' else 'danger' }}">
+                                    {{ r.competency_status or '-' }}
+                                </span>
+                            </td>
+                            <td>{{ '✓' if r.is_published else '✗' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center text-muted">No results yet</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Transcripts -->
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-file-alt me-2"></i>Transcripts</span>
+                <a href="{{ url_for('admin.generate_transcript') }}" class="btn btn-sm btn-primary">Generate</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table mb-0 small">
+                    <thead class="table-light"><tr><th>Serial No</th><th>Program</th><th>Year</th><th>Date</th></tr></thead>
+                    <tbody>
+                        {% for t in transcripts %}
+                        <tr>
+                            <td><code class="text-primary">{{ t.serial_number }}</code></td>
+                            <td>{{ t.program.name[:30] }}...</td>
+                            <td>{{ t.academic_year.name }}</td>
+                            <td>{{ t.generated_at.strftime('%d/%m/%Y') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center text-muted">No transcripts generated</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

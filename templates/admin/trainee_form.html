@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if trainee else 'Add' }} Trainee - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-user-graduate me-2 text-primary"></i>{{ 'Edit' if trainee else 'Add' }} Trainee</h4>
+</div>
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <h6 class="text-primary border-bottom pb-2 mb-3">Personal Information</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="full_name" class="form-control" value="{{ trainee.user.full_name if trainee else '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">National ID</label>
+                            <input type="text" name="national_id" class="form-control" value="{{ trainee.national_id if trainee else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Date of Birth</label>
+                            <input type="date" name="date_of_birth" class="form-control" value="{{ trainee.date_of_birth.strftime('%Y-%m-%d') if trainee and trainee.date_of_birth else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Gender</label>
+                            <select name="gender" class="form-select">
+                                <option value="">-- Select --</option>
+                                <option value="Male" {% if trainee and trainee.gender == 'Male' %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if trainee and trainee.gender == 'Female' %}selected{% endif %}>Female</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">County</label>
+                            <input type="text" name="county" class="form-control" value="{{ trainee.county if trainee else '' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Address</label>
+                            <textarea name="address" class="form-control" rows="2">{{ trainee.address if trainee else '' }}</textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Guardian Name</label>
+                            <input type="text" name="guardian_name" class="form-control" value="{{ trainee.guardian_name if trainee else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Guardian Phone</label>
+                            <input type="text" name="guardian_phone" class="form-control" value="{{ trainee.guardian_phone if trainee else '' }}">
+                        </div>
+                    </div>
+
+                    <h6 class="text-primary border-bottom pb-2 mb-3 mt-4">Account Information</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                            <input type="text" name="username" class="form-control" value="{{ trainee.user.username if trainee else '' }}" {% if trainee %}readonly{% else %}required{% endif %}>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ trainee.user.email if trainee else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Phone</label>
+                            <input type="text" name="phone" class="form-control" value="{{ trainee.user.phone if trainee else '' }}">
+                        </div>
+                        {% if not trainee %}
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Password</label>
+                            <input type="text" name="password" class="form-control" value="Ttti@2025" placeholder="Default: Ttti@2025">
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if not trainee %}
+                    <h6 class="text-primary border-bottom pb-2 mb-3 mt-4">Enrollment</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Program</label>
+                            <select name="program_id" class="form-select">
+                                <option value="">-- Select Program --</option>
+                                {% for prog in programs %}
+                                <option value="{{ prog.id }}">{{ prog.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Intake Month</label>
+                            <select name="intake_month" class="form-select">
+                                {% for month in ['January','February','March','April','May','June','July','August','September','October','November','December'] %}
+                                <option value="{{ month }}">{{ month }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>{{ 'Update' if trainee else 'Register Trainee' }}</button>
+                        <a href="{{ url_for('admin.trainees') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if trainer else 'Add' }} Trainer - TTTI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="fas fa-chalkboard-teacher me-2 text-primary"></i>{{ 'Edit' if trainer else 'Add' }} Trainer</h4>
+</div>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="full_name" class="form-control" value="{{ trainer.user.full_name if trainer else '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ trainer.user.email if trainer else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Phone</label>
+                            <input type="text" name="phone" class="form-control" value="{{ trainer.user.phone if trainer else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Department</label>
+                            <select name="department_id" class="form-select">
+                                <option value="">-- Select --</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}" {% if trainer and trainer.department_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Qualification</label>
+                            <input type="text" name="qualification" class="form-control" value="{{ trainer.qualification if trainer else '' }}" placeholder="e.g., BSc Electrical Engineering">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">TVETA License No.</label>
+                            <input type="text" name="tveta_license" class="form-control" value="{{ trainer.tveta_license if trainer else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Specialization</label>
+                            <input type="text" name="specialization" class="form-control" value="{{ trainer.specialization if trainer else '' }}">
+                        </div>
+                        {% if not trainer %}
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Password</label>
+                            <input type="text" name="password" class="form-control" value="Ttti@2025">
+                        </div>
+                        {% endif %}
+                        <div class="col-12 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>{{ 'Update' if trainer else 'Add Trainer' }}</button>
+                            <a href="{{ url_for('admin.trainers') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

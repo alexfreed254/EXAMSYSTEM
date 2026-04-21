@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Transcripts - TTTI{% endblock %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4><i class="fas fa-file-alt me-2 text-primary"></i>Transcripts</h4>
+    <a href="{{ url_for('admin.generate_transcript') }}" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus me-1"></i>Generate Transcript
+    </a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr><th>#</th><th>Serial Number</th><th>Trainee</th><th>Admission No</th><th>Program</th><th>Academic Year</th><th>Generated</th><th>Downloads</th><th>Official</th></tr>
+                </thead>
+                <tbody>
+                    {% for t in transcripts %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><code class="text-primary fw-bold">{{ t.serial_number }}</code></td>
+                        <td>{{ t.trainee.user.full_name }}</td>
+                        <td><code>{{ t.trainee.admission_number }}</code></td>
+                        <td>{{ t.program.name[:35] }}...</td>
+                        <td>{{ t.academic_year.name }}</td>
+                        <td>{{ t.generated_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td><span class="badge bg-info">{{ t.download_count }}</span></td>
+                        <td>
+                            {% if t.is_official %}
+                            <span class="badge bg-success"><i class="fas fa-check"></i> Official</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Unofficial</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="9" class="text-center text-muted py-4">No transcripts generated yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
