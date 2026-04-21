@@ -5,7 +5,8 @@ load_dotenv()
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'ttti-secret-key-2025-change-in-production'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'postgresql://localhost/ttti_db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'postgresql://examinations_zlqu_user:sphYaOXqVLzxp18oMgkedS2ZvkItP1g0@dpg-d7jjb0q8qa3s73alhba0-a.oregon-postgres.render.com/examinations_zlqu'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
