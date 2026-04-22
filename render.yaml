@@ -4,7 +4,7 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: pip install -r requirements.txt && python init_db.py
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn wsgi:app --workers 2 --bind 0.0.0.0:$PORT --timeout 120
     envVars:
       - key: FLASK_ENV
@@ -12,6 +12,6 @@ services:
       - key: SECRET_KEY
         value: ttti-super-secret-2025-xK9mP3qR7nZ
       - key: DATABASE_URL
-        value: postgresql://examinations_zlqu_user:sphYaOXqVLzxp18oMgkedS2ZvkItP1g0@dpg-d7jjb0q8qa3s73alhba0-a.oregon-postgres.render.com/examinations_zlqu
+        sync: false   # Set this manually in Render dashboard from Supabase
       - key: PYTHON_VERSION
         value: 3.11.0
