@@ -30,23 +30,23 @@
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
             <div class="nav-section">ACADEMIC</div>
-            <a href="{{ url_for('admin.departments') }}" class="nav-link {% if 'department' in request.endpoint %}active{% endif %}">
+            <a href="{{ url_for('admin.departments') }}" class="nav-link {% if request.endpoint and 'department' in request.endpoint %}active{% endif %}">
                 <i class="fas fa-building"></i> Departments
             </a>
-            <a href="{{ url_for('admin.programs') }}" class="nav-link {% if 'program' in request.endpoint %}active{% endif %}">
+            <a href="{{ url_for('admin.programs') }}" class="nav-link {% if request.endpoint and 'program' in request.endpoint %}active{% endif %}">
                 <i class="fas fa-graduation-cap"></i> Programs
             </a>
-            <a href="{{ url_for('admin.courses') }}" class="nav-link {% if 'course' in request.endpoint %}active{% endif %}">
+            <a href="{{ url_for('admin.courses') }}" class="nav-link {% if request.endpoint and 'course' in request.endpoint %}active{% endif %}">
                 <i class="fas fa-book"></i> Units/Courses
             </a>
-            <a href="{{ url_for('admin.academic_years') }}" class="nav-link {% if 'academic_year' in request.endpoint %}active{% endif %}">
+            <a href="{{ url_for('admin.academic_years') }}" class="nav-link {% if request.endpoint and 'academic_year' in request.endpoint %}active{% endif %}">
                 <i class="fas fa-calendar-alt"></i> Academic Years
             </a>
             <div class="nav-section">PEOPLE</div>
-            <a href="{{ url_for('admin.trainees') }}" class="nav-link {% if 'trainee' in request.endpoint %}active{% endif %}">
+            <a href="{{ url_for('admin.trainees') }}" class="nav-link {% if request.endpoint and 'trainee' in request.endpoint %}active{% endif %}">
                 <i class="fas fa-user-graduate"></i> Trainees
             </a>
-            <a href="{{ url_for('admin.trainers') }}" class="nav-link {% if 'trainer' in request.endpoint %}active{% endif %}">
+            <a href="{{ url_for('admin.trainers') }}" class="nav-link {% if request.endpoint and 'trainer' in request.endpoint %}active{% endif %}">
                 <i class="fas fa-chalkboard-teacher"></i> Trainers
             </a>
             <a href="{{ url_for('admin.users') }}" class="nav-link {% if request.endpoint == 'admin.users' %}active{% endif %}">
@@ -56,11 +56,11 @@
             <a href="{{ url_for('admin.results') }}" class="nav-link {% if request.endpoint == 'admin.results' %}active{% endif %}">
                 <i class="fas fa-chart-bar"></i> Results
             </a>
-            <a href="{{ url_for('admin.transcripts') }}" class="nav-link {% if 'transcript' in request.endpoint %}active{% endif %}">
+            <a href="{{ url_for('admin.transcripts') }}" class="nav-link {% if request.endpoint and 'transcript' in request.endpoint %}active{% endif %}">
                 <i class="fas fa-file-alt"></i> Transcripts
             </a>
             <div class="nav-section">SYSTEM</div>
-            <a href="{{ url_for('admin.system_logs') }}" class="nav-link {% if 'log' in request.endpoint %}active{% endif %}">
+            <a href="{{ url_for('admin.system_logs') }}" class="nav-link {% if request.endpoint and 'log' in request.endpoint %}active{% endif %}">
                 <i class="fas fa-history"></i> System Logs
             </a>
             {% elif current_user.role == 'trainer' %}
@@ -69,7 +69,7 @@
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
             <div class="nav-section">RESULTS</div>
-            <a href="{{ url_for('trainer.upload_results') }}" class="nav-link {% if 'upload' in request.endpoint %}active{% endif %}">
+            <a href="{{ url_for('trainer.upload_results') }}" class="nav-link {% if request.endpoint and 'upload' in request.endpoint %}active{% endif %}">
                 <i class="fas fa-upload"></i> Upload Results
             </a>
             <a href="{{ url_for('trainer.my_results') }}" class="nav-link {% if request.endpoint == 'trainer.my_results' %}active{% endif %}">
@@ -92,17 +92,17 @@
             <a href="{{ url_for('trainee.results') }}" class="nav-link {% if request.endpoint == 'trainee.results' %}active{% endif %}">
                 <i class="fas fa-chart-bar"></i> My Results
             </a>
-            <a href="{{ url_for('trainee.results_by_module') }}" class="nav-link {% if 'module' in request.endpoint %}active{% endif %}">
+            <a href="{{ url_for('trainee.results_by_module') }}" class="nav-link {% if request.endpoint and 'module' in request.endpoint %}active{% endif %}">
                 <i class="fas fa-layer-group"></i> Results by Module
             </a>
             <a href="{{ url_for('trainee.transcripts') }}" class="nav-link {% if request.endpoint == 'trainee.transcripts' %}active{% endif %}">
                 <i class="fas fa-file-pdf"></i> My Transcripts
             </a>
             <div class="nav-section">ACCOUNT</div>
-            <a href="{{ url_for('trainee.notifications') }}" class="nav-link {% if 'notification' in request.endpoint %}active{% endif %}">
+            <a href="{{ url_for('trainee.notifications') }}" class="nav-link {% if request.endpoint and 'notification' in request.endpoint %}active{% endif %}">
                 <i class="fas fa-bell"></i> Notifications
-                {% set unread = current_user.notifications | selectattr('is_read', 'equalto', false) | list | length %}
-                {% if unread > 0 %}<span class="badge bg-danger ms-1">{{ unread }}</span>{% endif %}
+                {% set unread_notifs = current_user.notifications | selectattr('is_read', 'equalto', false) | list %}
+                {% if unread_notifs | length > 0 %}<span class="badge bg-danger ms-1">{{ unread_notifs | length }}</span>{% endif %}
             </a>
             <a href="{{ url_for('trainee.profile') }}" class="nav-link {% if request.endpoint == 'trainee.profile' %}active{% endif %}">
                 <i class="fas fa-user-circle"></i> My Profile
