@@ -1,3 +1,4 @@
+# Render hosting only — database is Supabase (external)
 services:
   - type: web
     name: ttti-erms
@@ -5,15 +6,13 @@ services:
     region: oregon
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn main:application --workers 1 --bind 0.0.0.0:$PORT --timeout 120 --log-level info
+    startCommand: gunicorn main:application --workers 1 --bind 0.0.0.0:$PORT --timeout 120
     envVars:
       - key: FLASK_ENV
         value: production
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: SECRET_KEY
-        sync: false
-      - key: DATABASE_URL
         sync: false
       - key: DB_PASSWORD
         sync: false

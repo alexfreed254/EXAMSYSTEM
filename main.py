@@ -1,5 +1,5 @@
 """
-TTTI ERMS — Gunicorn entry point
+TTTI ERMS — Gunicorn entry point (Render hosting + Supabase database)
 Start: gunicorn main:application --workers 1 --bind 0.0.0.0:$PORT --timeout 120
 """
 import os
@@ -18,29 +18,23 @@ def inject_globals():
     return {'now': datetime.utcnow()}
 
 
-# ── Startup: connect DB and seed ─────────────────────────────────────────────
+# ── Startup: verify Supabase connection and seed if needed ───────────────────
 with application.app_context():
     try:
-        db_url = application.config.get('SQLALCHEMY_DATABASE_URI', 'NOT SET')
-        print(f"[startup] DB URL: {db_url[:60]}...")
-
-        # Test connection first
+        print(f"[startup] DB_PASSWORD set: {bool(os.environ.get('DB_PASSWORD'))}")
         db.session.execute(db.text('SELECT 1'))
-        print("[startup] DB connection OK")
-
+        print("[startup] Supabase connection OK")
         db.create_all()
         print("[startup] Tables verified")
-
         from app.models import User
         count = User.query.count()
-        print(f"[startup] Users: {count}")
-
+        print(f"[startup] Users in DB: {count}")
         if count == 0:
             from init_db import init_database
             init_database()
-
+            print("[startup] Seed complete")
     except Exception as e:
-        print(f"[startup] ERROR — {type(e).__name__}: {e}")
+        print(f"[startup] ERROR: {type(e).__name__}: {e}")
         traceback.print_exc()
 
 

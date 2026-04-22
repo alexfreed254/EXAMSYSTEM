@@ -3,56 +3,56 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# ── Supabase project constants ────────────────────────────────────────────────
+SUPABASE_REF = 'igphwverobcvslmgpxdo'
+SUPABASE_HOST = f'aws-0-us-east-1.pooler.supabase.com'
+SUPABASE_PORT = '5432'
+SUPABASE_DB   = 'postgres'
 
-def _build_db_url():
+
+def get_database_url():
     """
-    Build the database URL from environment.
-    Supports both full DATABASE_URL and individual Supabase components.
+    Always returns a valid Supabase Session Pooler URL.
+    Username MUST be: postgres.igphwverobcvslmgpxdo  (not just 'postgres')
     """
-    url = os.environ.get('DATABASE_URL', '')
+    password = os.environ.get('DB_PASSWORD', '')
 
-    # Fix legacy postgres:// prefix
-    if url.startswith('postgres://'):
-        url = url.replace('postgres://', 'postgresql://', 1)
+    if not password:
+        print("[config] WARNING: DB_PASSWORD not set — using SQLite fallback")
+        return 'sqlite:///local_dev.db'
 
-    if url:
-        return url
-
-    # Build from Supabase components if DATABASE_URL not set
-    # Direct connection: db.[ref].supabase.co:5432
-    ref = 'igphwverobcvslmgpxdo'
-    pwd = os.environ.get('DB_PASSWORD', '')
-    if pwd:
-        return f'postgresql://postgres.{ref}:{pwd}@aws-0-us-east-1.pooler.supabase.com:5432/postgres'
-
-    return 'sqlite:///local_dev.db'
+    url = (
+        f'postgresql://postgres.{SUPABASE_REF}:{password}'
+        f'@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB}'
+    )
+    print(f"[config] DB URL: postgresql://postgres.{SUPABASE_REF}:***@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB}")
+    return url
 
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'ttti-dev-key-change-in-prod'
-    SQLALCHEMY_DATABASE_URI = _build_db_url()
+
+    SQLALCHEMY_DATABASE_URI    = get_database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Supabase client credentials
-    SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://igphwverobcvslmgpxdo.supabase.co')
+    SUPABASE_URL = f'https://{SUPABASE_REF}.supabase.co'
     SUPABASE_KEY = os.environ.get('SUPABASE_ANON_KEY', '')
 
-    # SQLAlchemy engine options — tuned for Supabase
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,
-        'pool_recycle': 280,
-        'pool_size': 3,
-        'max_overflow': 1,
+        'pool_recycle':  280,
+        'pool_size':     3,
+        'max_overflow':  1,
         'connect_args': {
-            'sslmode': 'require',
-            'connect_timeout': 15,
+            'sslmode':          'require',
+            'connect_timeout':  15,
             'application_name': 'ttti-erms',
         }
     }
 
-    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true'
+    MAIL_SERVER   = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT     = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS  = os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true'
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     UPLOAD_FOLDER = 'uploads'
@@ -60,18 +60,13 @@ class Config:
 
     @staticmethod
     def init_app(app):
-        # Re-evaluate URL at runtime in case env vars loaded late
-        url = _build_db_url()
+        # Re-build URL at runtime so env vars are definitely loaded
+        url = get_database_url()
         app.config['SQLALCHEMY_DATABASE_URI'] = url
-        print(f"[config] DB URL prefix: {url[:60]}")
 
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,
-        'connect_args': {'sslmode': 'require', 'connect_timeout': 15}
-    }
 
 
 class ProductionConfig(Config):
@@ -80,6 +75,6 @@ class ProductionConfig(Config):
 
 config = {
     'development': DevelopmentConfig,
-    'production': ProductionConfig,
-    'default': ProductionConfig,
+    'production':  ProductionConfig,
+    'default':     ProductionConfig,
 }
