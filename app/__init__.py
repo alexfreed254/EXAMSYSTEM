@@ -53,4 +53,20 @@ def create_app(config_name=None):
     from app.main import main as main_bp
     app.register_blueprint(main_bp)
 
+    # ── Global error handlers ────────────────────────────────────────────────
+    @app.errorhandler(500)
+    def internal_error(e):
+        import traceback
+        from flask import render_template_string
+        tb = traceback.format_exc()
+        print(f"[500 ERROR] {tb}")
+        # Show detailed error in production temporarily for debugging
+        return render_template_string("""
+        <!DOCTYPE html><html><body style="font-family:monospace;padding:20px;background:#1a1a2e;color:#e94560">
+        <h2>500 Internal Server Error</h2>
+        <pre style="background:#16213e;padding:15px;color:#0f3460;color:#a8dadc;border-radius:8px;overflow:auto">{{ tb }}</pre>
+        <p><a href="/" style="color:#e94560">Go Home</a></p>
+        </body></html>
+        """, tb=tb), 500
+
     return app
