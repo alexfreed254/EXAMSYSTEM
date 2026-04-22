@@ -13,9 +13,9 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS users (
     id            SERIAL PRIMARY KEY,
+    supabase_uid  VARCHAR(36) UNIQUE NOT NULL,  -- Supabase auth.users UUID
     username      VARCHAR(80)  UNIQUE NOT NULL,
     email         VARCHAR(120) UNIQUE NOT NULL,
-    password_hash VARCHAR(256) NOT NULL,
     role          VARCHAR(20)  NOT NULL CHECK (role IN ('admin','trainer','trainee')),
     full_name     VARCHAR(150) NOT NULL,
     phone         VARCHAR(20),
@@ -306,12 +306,25 @@ CREATE POLICY "Service role all notifs"       ON notifications FOR ALL USING (tr
 CREATE POLICY "Service role all logs"         ON system_logs  FOR ALL USING (true);
 
 -- ============================================================================
---  NOTE: User passwords are set by the Flask app on first startup via init_db.py
---  The app uses Werkzeug scrypt hashing — passwords cannot be pre-hashed in SQL.
---  After deploying to Render, the app auto-creates these accounts:
---    admin    / Admin@2025
---    trainer1 / Trainer@2025
---    trainee1 / Trainee@2025
+--  USER ACCOUNTS — Created via Supabase Auth (NOT via SQL password hashes)
+--
+--  Option A (Automatic): Deploy Flask app with SUPABASE_SERVICE_KEY set.
+--                        App auto-seeds on first startup via init_db.py
+--
+--  Option B (Manual):
+--    1. Supabase → Authentication → Users → Add User → Auto Confirm
+--       Email: admin@ttti.ac.ke  Password: Admin@2025
+--    2. Copy the UUID shown, then run in SQL Editor:
+--
+--  INSERT INTO users (supabase_uid, username, email, role, full_name, phone, is_active)
+--  VALUES ('PASTE-UUID-HERE', 'admin', 'admin@ttti.ac.ke', 'admin', 'System Administrator', '+254-67-22396', TRUE);
+--
+--  Repeat for trainer1@ttti.ac.ke (role=trainer) and trainee1@ttti.ac.ke (role=trainee)
+--
+--  Login credentials after seeding:
+--    admin@ttti.ac.ke    / Admin@2025
+--    trainer1@ttti.ac.ke / Trainer@2025
+--    trainee1@ttti.ac.ke / Trainee@2025
 -- ============================================================================
 
 DO $$
