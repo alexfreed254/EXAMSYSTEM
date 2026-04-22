@@ -1,9 +1,9 @@
-from flask import render_template, redirect, url_for, flash, request, send_file, abort
-from flask_login import login_required, current_user
+from flask import render_template, redirect, url_for, flash, request, send_file, abort, g
 from functools import wraps
 from app.trainee import trainee
 from app.models import Trainee, Result, Transcript, Enrollment, AcademicYear, Course, Program
 from app import db
+from app.auth.routes import login_required
 from app.utils.pdf_generator import generate_transcript_pdf
 from datetime import datetime
 
@@ -11,15 +11,18 @@ from datetime import datetime
 def trainee_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'trainee':
-            flash('Trainee access required.', 'danger')
+        user = g.get('current_user')
+        if not user:
             return redirect(url_for('auth.login'))
+        if user.role != 'trainee':
+            flash('Trainee access required.', 'danger')
+            return redirect(url_for('main.dashboard'))
         return f(*args, **kwargs)
     return decorated
 
 
 def get_trainee():
-    return Trainee.query.filter_by(user_id=current_user.id).first()
+    return Trainee.query.filter_by(user_id=g.current_user.id).first()
 
 
 @trainee.route('/dashboard')
@@ -171,7 +174,7 @@ def profile():
 def notifications():
     from app.models import Notification
     notifs = (Notification.query
-              .filter_by(user_id=current_user.id)
+              .filter_by(user_id=g.current_user.id)
               .order_by(Notification.created_at.desc()).all())
     # Mark all as read
     for n in notifs:

@@ -1,10 +1,10 @@
-from flask import render_template, redirect, url_for, flash, request, send_file
-from flask_login import login_required, current_user
+from flask import render_template, redirect, url_for, flash, request, send_file, g
 from functools import wraps
 from app.trainer import trainer
 from app.models import (Trainer, Trainee, Course, Result, AcademicYear,
                          Program, Enrollment, User, Notification)
 from app import db
+from app.auth.routes import login_required
 import pandas as pd
 import os
 from datetime import datetime
@@ -16,15 +16,18 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 def trainer_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'trainer':
-            flash('Trainer access required.', 'danger')
+        user = g.get('current_user')
+        if not user:
             return redirect(url_for('auth.login'))
+        if user.role != 'trainer':
+            flash('Trainer access required.', 'danger')
+            return redirect(url_for('main.dashboard'))
         return f(*args, **kwargs)
     return decorated
 
 
 def get_trainer():
-    return Trainer.query.filter_by(user_id=current_user.id).first()
+    return Trainer.query.filter_by(user_id=g.current_user.id).first()
 
 
 @trainer.route('/dashboard')

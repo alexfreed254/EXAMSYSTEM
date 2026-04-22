@@ -1,6 +1,5 @@
 Flask==3.0.3
 Flask-SQLAlchemy==3.1.1
-Flask-Login==0.6.3
 Flask-WTF==1.2.1
 Flask-Migrate==4.0.7
 Flask-Mail==0.10.0
@@ -18,3 +17,4 @@ xlrd==2.0.1
 qrcode==7.4.2
 cryptography==42.0.8
 supabase==2.4.0
+PyJWT==2.8.0
