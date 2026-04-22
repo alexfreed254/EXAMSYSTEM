@@ -4,19 +4,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'ttti-secret-key-2025-change-in-production'
-    # Supabase PostgreSQL — project: igphwverobcvslmgpxdo
-    # DATABASE_URL must be set in Render environment variables
-    # Format: postgresql://postgres.[ref]:[password]@aws-0-us-east-1.pooler.supabase.com:6543/postgres
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://postgres.igphwverobcvslmgpxdo:your-db-password@aws-0-us-east-1.pooler.supabase.com:6543/postgres'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'change-this-in-production'
 
-    SUPABASE_URL = 'https://igphwverobcvslmgpxdo.supabase.co'
-    SUPABASE_ANON_KEY = (
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
-        '.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGh3dmVyb2JjdnNsbWdweGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NDM2MTUsImV4cCI6MjA5MjQxOTYxNX0'
-        '.bBjFLktHZ-hCX1Hunw5-Z05qerEwBq-6CQ24IHciIxQ'
-    )
+    # ── Database ─────────────────────────────────────────────────────────────
+    # Set DATABASE_URL in Render environment variables — never hardcode here
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///local_dev.db'   # fallback for local dev only
+
+    SUPABASE_URL      = os.environ.get('SUPABASE_URL', '')
+    SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY', '')
 
     # SQLAlchemy pool settings for Supabase Pooler (port 6543 = transaction mode)
     SQLALCHEMY_ENGINE_OPTIONS = {
