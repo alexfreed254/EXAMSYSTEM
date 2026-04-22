@@ -4,9 +4,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ── Supabase project constants ────────────────────────────────────────────────
-SUPABASE_REF = 'igphwverobcvslmgpxdo'
-SUPABASE_HOST = f'aws-0-us-east-1.pooler.supabase.com'
-SUPABASE_PORT = '5432'
+SUPABASE_REF  = 'igphwverobcvslmgpxdo'
+SUPABASE_HOST = 'aws-0-eu-west-1.pooler.supabase.com'
+SUPABASE_PORT = '6543'
 SUPABASE_DB   = 'postgres'
 
 
@@ -44,9 +44,10 @@ class Config:
         'pool_size':     3,
         'max_overflow':  1,
         'connect_args': {
-            'sslmode':          'require',
-            'connect_timeout':  15,
-            'application_name': 'ttti-erms',
+            'sslmode':            'require',
+            'connect_timeout':    15,
+            'application_name':   'ttti-erms',
+            'options':            '-c statement_timeout=30000',
         }
     }
 
