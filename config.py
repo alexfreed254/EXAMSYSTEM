@@ -5,12 +5,20 @@ load_dotenv()
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'ttti-secret-key-2025-change-in-production'
-    # Supabase PostgreSQL connection (Transaction Pooler — port 6543)
-    # Set DATABASE_URL in Render environment variables
+    # Supabase PostgreSQL — project: igphwverobcvslmgpxdo
+    # DATABASE_URL must be set in Render environment variables
+    # Format: postgresql://postgres.[ref]:[password]@aws-0-us-east-1.pooler.supabase.com:6543/postgres
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://postgres:your-supabase-password@db.your-project-ref.supabase.co:5432/postgres'
+        'postgresql://postgres.igphwverobcvslmgpxdo:your-db-password@aws-0-us-east-1.pooler.supabase.com:6543/postgres'
 
-    # SQLAlchemy connection pool settings optimised for Supabase
+    SUPABASE_URL = 'https://igphwverobcvslmgpxdo.supabase.co'
+    SUPABASE_ANON_KEY = (
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
+        '.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGh3dmVyb2JjdnNsbWdweGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NDM2MTUsImV4cCI6MjA5MjQxOTYxNX0'
+        '.bBjFLktHZ-hCX1Hunw5-Z05qerEwBq-6CQ24IHciIxQ'
+    )
+
+    # SQLAlchemy pool settings for Supabase Pooler (port 6543 = transaction mode)
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,
         'pool_recycle': 300,
