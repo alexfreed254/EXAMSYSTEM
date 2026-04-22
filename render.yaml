@@ -18,4 +18,4 @@ services:
       - key: SUPABASE_ANON_KEY
         sync: false        # Set manually in Render dashboard
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.9
