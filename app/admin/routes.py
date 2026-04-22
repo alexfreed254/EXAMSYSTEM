@@ -265,32 +265,48 @@ def add_trainee():
     if request.method == 'POST':
         email     = request.form.get('email', '').strip().lower()
         full_name = request.form.get('full_name', '').strip()
-        password  = request.form.get('password', 'Ttti@2025')
-        username  = request.form.get('username', '').strip()
+        phone     = request.form.get('phone', '').strip()
 
-        if User.query.filter_by(email=email).first():
-            flash('Email already registered.', 'danger')
+        if not email or not full_name:
+            flash('Full name and email are required.', 'danger')
             return render_template('admin/trainee_form.html', trainee=None, programs=programs)
 
+        if User.query.filter_by(email=email).first():
+            flash(f'Email "{email}" is already registered.', 'danger')
+            return render_template('admin/trainee_form.html', trainee=None, programs=programs)
+
+        default_password = '1234'
+
+        base_username = email.split('@')[0].lower().replace('.', '_')
+        username = base_username
+        counter  = 1
+        while User.query.filter_by(username=username).first():
+            username = f"{base_username}{counter}"
+            counter += 1
+
         try:
-            # Create user in Supabase Auth
             from app.supabase_client import get_supabase_admin
             admin_client = get_supabase_admin()
-            auth_response = admin_client.auth.admin.create_user({
-                'email': email,
-                'password': password,
+            auth_resp = admin_client.auth.admin.create_user({
+                'email':         email,
+                'password':      default_password,
                 'email_confirm': True,
                 'user_metadata': {'role': 'trainee', 'full_name': full_name}
             })
-            supabase_uid = auth_response.user.id
+            supabase_uid = auth_resp.user.id
         except Exception as e:
-            flash(f'Error creating auth account: {str(e)}', 'danger')
+            flash(f'Error creating Supabase account: {str(e)}', 'danger')
             return render_template('admin/trainee_form.html', trainee=None, programs=programs)
 
-        # Create profile in our DB
-        user = User(supabase_uid=supabase_uid, username=username or email.split('@')[0],
-                    email=email, full_name=full_name, role='trainee',
-                    phone=request.form.get('phone', ''))
+        user = User(
+            supabase_uid=supabase_uid,
+            username=username,
+            email=email,
+            full_name=full_name,
+            role='trainee',
+            phone=phone,
+            must_change_password=True,
+        )
         db.session.add(user)
         db.session.flush()
 
@@ -300,23 +316,34 @@ def add_trainee():
         dob_str      = request.form.get('date_of_birth', '')
         dob          = datetime.strptime(dob_str, '%Y-%m-%d').date() if dob_str else None
 
-        trainee = Trainee(user_id=user.id, admission_number=admission_no,
-                          national_id=request.form.get('national_id', '').strip(),
-                          date_of_birth=dob, gender=request.form.get('gender', ''),
-                          county=request.form.get('county', '').strip(),
-                          address=request.form.get('address', '').strip(),
-                          guardian_name=request.form.get('guardian_name', '').strip(),
-                          guardian_phone=request.form.get('guardian_phone', '').strip())
+        trainee = Trainee(
+            user_id=user.id,
+            admission_number=admission_no,
+            national_id=request.form.get('national_id', '').strip(),
+            date_of_birth=dob,
+            gender=request.form.get('gender', ''),
+            county=request.form.get('county', '').strip(),
+            address=request.form.get('address', '').strip(),
+            guardian_name=request.form.get('guardian_name', '').strip(),
+            guardian_phone=request.form.get('guardian_phone', '').strip(),
+        )
         db.session.add(trainee)
         db.session.flush()
 
         program_id = request.form.get('program_id', type=int)
         if program_id:
-            db.session.add(Enrollment(trainee_id=trainee.id, program_id=program_id,
-                                      intake_year=datetime.utcnow().year,
-                                      intake_month=request.form.get('intake_month', 'January')))
+            db.session.add(Enrollment(
+                trainee_id=trainee.id,
+                program_id=program_id,
+                intake_year=datetime.utcnow().year,
+                intake_month=request.form.get('intake_month', 'January'),
+            ))
         db.session.commit()
-        flash(f'Trainee "{full_name}" added. Admission: {admission_no}', 'success')
+        flash(
+            f'Trainee "{full_name}" registered. '
+            f'Admission No: {admission_no} | Login: {email} | Default password: 1234',
+            'success'
+        )
         return redirect(url_for('admin.trainees'))
 
     return render_template('admin/trainee_form.html', trainee=None, programs=programs)
@@ -375,30 +402,52 @@ def add_trainer():
     if request.method == 'POST':
         email     = request.form.get('email', '').strip().lower()
         full_name = request.form.get('full_name', '').strip()
-        password  = request.form.get('password', 'Ttti@2025')
-        username  = request.form.get('username', '').strip()
+        phone     = request.form.get('phone', '').strip()
+
+        # Validate required fields
+        if not email or not full_name:
+            flash('Full name and email are required.', 'danger')
+            return render_template('admin/trainer_form.html', trainer=None, departments=departments)
 
         if User.query.filter_by(email=email).first():
-            flash('Email already registered.', 'danger')
+            flash(f'Email "{email}" is already registered.', 'danger')
             return render_template('admin/trainer_form.html', trainer=None, departments=departments)
+
+        # Default password is 1234 — trainer must change on first login
+        default_password = '1234'
+
+        # Auto-generate username from email prefix
+        base_username = email.split('@')[0].lower().replace('.', '_')
+        username = base_username
+        counter  = 1
+        while User.query.filter_by(username=username).first():
+            username = f"{base_username}{counter}"
+            counter += 1
 
         try:
             from app.supabase_client import get_supabase_admin
             admin_client = get_supabase_admin()
-            auth_response = admin_client.auth.admin.create_user({
-                'email': email,
-                'password': password,
-                'email_confirm': True,
-                'user_metadata': {'role': 'trainer', 'full_name': full_name}
+            auth_resp = admin_client.auth.admin.create_user({
+                'email':          email,
+                'password':       default_password,
+                'email_confirm':  True,
+                'user_metadata':  {'role': 'trainer', 'full_name': full_name}
             })
-            supabase_uid = auth_response.user.id
+            supabase_uid = auth_resp.user.id
         except Exception as e:
-            flash(f'Error creating auth account: {str(e)}', 'danger')
+            flash(f'Error creating Supabase account: {str(e)}', 'danger')
             return render_template('admin/trainer_form.html', trainer=None, departments=departments)
 
-        user = User(supabase_uid=supabase_uid, username=username or email.split('@')[0],
-                    email=email, full_name=full_name, role='trainer',
-                    phone=request.form.get('phone', ''))
+        # Save profile to our DB
+        user = User(
+            supabase_uid=supabase_uid,
+            username=username,
+            email=email,
+            full_name=full_name,
+            role='trainer',
+            phone=phone,
+            must_change_password=True,   # force change on first login
+        )
         db.session.add(user)
         db.session.flush()
 
@@ -406,14 +455,20 @@ def add_trainer():
         emp_id = f"TTTI/TR/{count:04d}"
         db.session.add(Trainer(
             user_id=user.id,
-            department_id=request.form.get('department_id', type=int),
+            department_id=request.form.get('department_id', type=int) or None,
             employee_id=emp_id,
             qualification=request.form.get('qualification', '').strip(),
             tveta_license=request.form.get('tveta_license', '').strip(),
             specialization=request.form.get('specialization', '').strip(),
         ))
         db.session.commit()
-        flash(f'Trainer "{full_name}" added. ID: {emp_id}', 'success')
+
+        flash(
+            f'Trainer "{full_name}" added successfully. '
+            f'Employee ID: {emp_id} | Login: {email} | Default password: 1234 '
+            f'(trainer must change on first login)',
+            'success'
+        )
         return redirect(url_for('admin.trainers'))
 
     return render_template('admin/trainer_form.html', trainer=None, departments=departments)

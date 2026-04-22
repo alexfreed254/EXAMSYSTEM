@@ -1,62 +1,148 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Edit' if trainer else 'Add' }} Trainer - TTTI{% endblock %}
+{% block title %}{{ 'Edit' if trainer else 'Add New Trainer' }} - TTTI{% endblock %}
 {% block content %}
-<div class="page-header">
-    <h4><i class="fas fa-chalkboard-teacher me-2 text-primary"></i>{{ 'Edit' if trainer else 'Add' }} Trainer</h4>
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h4 class="mb-0"><i class="fas fa-chalkboard-teacher me-2 text-primary"></i>
+            {{ 'Edit Trainer' if trainer else 'Add New Trainer' }}
+        </h4>
+        <small class="text-muted">
+            {% if not trainer %}New trainer will receive default password: <strong>1234</strong> and must change it on first login.{% endif %}
+        </small>
+    </div>
+    <a href="{{ url_for('admin.trainers') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Back to Trainers
+    </a>
 </div>
+
 <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-md-9">
         <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-user-tie me-2"></i>Trainer Information
+            </div>
             <div class="card-body p-4">
-                <form method="POST">
-                    <div class="row g-3">
+
+                {% if not trainer %}
+                <div class="alert alert-info d-flex align-items-center mb-4">
+                    <i class="fas fa-info-circle fa-lg me-3"></i>
+                    <div>
+                        <strong>Account Setup:</strong> A Supabase Auth account will be created automatically.
+                        The trainer will log in with their <strong>email</strong> and default password <strong>1234</strong>.
+                        They will be prompted to change their password on first login.
+                    </div>
+                </div>
+                {% endif %}
+
+                <form method="POST" novalidate>
+                    <!-- Personal Info -->
+                    <h6 class="text-primary fw-bold border-bottom pb-2 mb-3">
+                        <i class="fas fa-user me-2"></i>Personal Information
+                    </h6>
+                    <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" name="full_name" class="form-control" value="{{ trainer.user.full_name if trainer else '' }}" required>
+                            <label class="form-label fw-semibold">
+                                Full Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="full_name" class="form-control form-control-lg"
+                                   value="{{ trainer.user.full_name if trainer else '' }}"
+                                   placeholder="e.g., John Kamau Mwangi" required autofocus>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Email</label>
-                            <input type="email" name="email" class="form-control" value="{{ trainer.user.email if trainer else '' }}">
+                            <label class="form-label fw-semibold">
+                                Email Address <span class="text-danger">*</span>
+                            </label>
+                            <input type="email" name="email" class="form-control form-control-lg"
+                                   value="{{ trainer.user.email if trainer else '' }}"
+                                   placeholder="e.g., jkamau@ttti.ac.ke"
+                                   {% if trainer %}readonly{% else %}required{% endif %}>
+                            {% if trainer %}
+                            <div class="form-text text-muted">Email cannot be changed after creation.</div>
+                            {% endif %}
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Phone</label>
-                            <input type="text" name="phone" class="form-control" value="{{ trainer.user.phone if trainer else '' }}">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <input type="text" name="phone" class="form-control"
+                                       value="{{ trainer.user.phone if trainer else '' }}"
+                                       placeholder="e.g., 0712345678">
+                            </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label fw-semibold">Department</label>
                             <select name="department_id" class="form-select">
-                                <option value="">-- Select --</option>
+                                <option value="">-- Select Department --</option>
                                 {% for dept in departments %}
-                                <option value="{{ dept.id }}" {% if trainer and trainer.department_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                                <option value="{{ dept.id }}"
+                                    {% if trainer and trainer.department_id == dept.id %}selected{% endif %}>
+                                    {{ dept.name }}
+                                </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-4">
+                    </div>
+
+                    <!-- Professional Info -->
+                    <h6 class="text-primary fw-bold border-bottom pb-2 mb-3">
+                        <i class="fas fa-briefcase me-2"></i>Professional Information
+                    </h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
                             <label class="form-label fw-semibold">Qualification</label>
-                            <input type="text" name="qualification" class="form-control" value="{{ trainer.qualification if trainer else '' }}" placeholder="e.g., BSc Electrical Engineering">
+                            <input type="text" name="qualification" class="form-control"
+                                   value="{{ trainer.qualification if trainer else '' }}"
+                                   placeholder="e.g., BSc Electrical Engineering">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">TVETA License No.</label>
-                            <input type="text" name="tveta_license" class="form-control" value="{{ trainer.tveta_license if trainer else '' }}">
+                            <input type="text" name="tveta_license" class="form-control"
+                                   value="{{ trainer.tveta_license if trainer else '' }}"
+                                   placeholder="e.g., TVETA/2024/001">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Specialization</label>
+                            <input type="text" name="specialization" class="form-control"
+                                   value="{{ trainer.specialization if trainer else '' }}"
+                                   placeholder="e.g., Power Systems & Electrical Installation">
+                        </div>
+                    </div>
+
+                    <!-- Account Info (add only) -->
+                    {% if not trainer %}
+                    <h6 class="text-primary fw-bold border-bottom pb-2 mb-3">
+                        <i class="fas fa-lock me-2"></i>Account Credentials
+                    </h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Default Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                <input type="text" class="form-control bg-light fw-bold"
+                                       value="1234" readonly>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1 text-warning"></i>
+                                Trainer must change this on first login.
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Specialization</label>
-                            <input type="text" name="specialization" class="form-control" value="{{ trainer.specialization if trainer else '' }}">
+                            <label class="form-label fw-semibold">Role</label>
+                            <input type="text" class="form-control bg-light fw-bold text-primary"
+                                   value="Trainer" readonly>
                         </div>
-                        {% if not trainer %}
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
-                            <input type="text" name="username" class="form-control" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Password</label>
-                            <input type="text" name="password" class="form-control" value="Ttti@2025">
-                        </div>
-                        {% endif %}
-                        <div class="col-12 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>{{ 'Update' if trainer else 'Add Trainer' }}</button>
-                            <a href="{{ url_for('admin.trainers') }}" class="btn btn-outline-secondary">Cancel</a>
-                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-2 pt-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-2"></i>
+                            {{ 'Update Trainer' if trainer else 'Create Trainer Account' }}
+                        </button>
+                        <a href="{{ url_for('admin.trainers') }}" class="btn btn-outline-secondary px-4">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
                     </div>
                 </form>
             </div>

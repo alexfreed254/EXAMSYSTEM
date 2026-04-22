@@ -82,6 +82,11 @@ def login():
                 db.session.add(log)
                 db.session.commit()
 
+                # Force password change if first login
+                if user.must_change_password:
+                    flash('Welcome! You must change your default password before continuing.', 'warning')
+                    return redirect(url_for('auth.change_password'))
+
                 next_page = request.args.get('next')
                 return redirect(next_page or url_for('main.dashboard'))
             else:
@@ -142,6 +147,11 @@ def change_password():
                     session.get('refresh_token', '')
                 )
                 supabase.auth.update_user({'password': new_pw})
+                # Clear the force-change flag
+                user = g.get('current_user')
+                if user and user.must_change_password:
+                    user.must_change_password = False
+                    db.session.commit()
                 flash('Password changed successfully.', 'success')
                 return redirect(url_for('main.dashboard'))
             except Exception as e:

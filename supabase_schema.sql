@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
     full_name     VARCHAR(150) NOT NULL,
     phone         VARCHAR(20),
     is_active     BOOLEAN      DEFAULT TRUE,
+    must_change_password BOOLEAN DEFAULT TRUE,  -- force change on first login
     profile_photo VARCHAR(200),
     created_at    TIMESTAMP    DEFAULT NOW()
 );

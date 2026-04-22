@@ -16,15 +16,16 @@ class User(db.Model):
     """
     __tablename__ = 'users'
     id            = db.Column(db.Integer, primary_key=True)
-    supabase_uid  = db.Column(db.String(36), unique=True, nullable=False)  # auth.users.id (UUID)
-    username      = db.Column(db.String(80), unique=True, nullable=False)
-    email         = db.Column(db.String(120), unique=True, nullable=False)
-    role          = db.Column(db.String(20), nullable=False)  # admin | trainer | trainee
-    full_name     = db.Column(db.String(150), nullable=False)
-    phone         = db.Column(db.String(20))
-    is_active     = db.Column(db.Boolean, default=True)
-    profile_photo = db.Column(db.String(200))
-    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
+    supabase_uid      = db.Column(db.String(36), unique=True, nullable=False)
+    username          = db.Column(db.String(80), unique=True, nullable=False)
+    email             = db.Column(db.String(120), unique=True, nullable=False)
+    role              = db.Column(db.String(20), nullable=False)
+    full_name         = db.Column(db.String(150), nullable=False)
+    phone             = db.Column(db.String(20))
+    is_active         = db.Column(db.Boolean, default=True)
+    must_change_password = db.Column(db.Boolean, default=True)  # force change on first login
+    profile_photo     = db.Column(db.String(200))
+    created_at        = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
     trainer_profile = db.relationship('Trainer', backref='user', uselist=False, cascade='all, delete-orphan')
